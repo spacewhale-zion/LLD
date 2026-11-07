@@ -26,7 +26,7 @@ class HourlyPricingStrategy:public IPricingStrategy{
     
 
 
-    double calculateFare(shared_ptr<Ticket> ticket,long exit){
+    double (shared_ptr<Ticket> ticket,long exit){
           
         if (ticket->getAllocatedSpot()->isReservedFor(ticket->getVehicle()->getOwnerUserId())) {
             return 0.0;
