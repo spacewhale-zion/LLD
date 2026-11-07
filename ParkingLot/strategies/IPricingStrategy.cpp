@@ -1,3 +1,5 @@
+#pragma once
+
 #include <bits/stdc++.h>
 
 #include<C:\ARYAN\STUDY\C++\LLD\ParkingLot\Enums\enums.cpp>
@@ -8,7 +10,8 @@ using namespace std;
 class IPricingStrategy{
     public:
 
-    virtual double calculateFare(shared_ptr<Ticket>& ticket,long exit) = 0;
+    virtual double calculateFare(const shared_ptr<Ticket>& ticket, long exitHour) = 0;
+    virtual ~IPricingStrategy() = default;
 };
 
 
@@ -19,26 +22,26 @@ class HourlyPricingStrategy:public IPricingStrategy{
     public:
 
     HourlyPricingStrategy() {
-        hourlyRates[VehicleType::TWO_WHEELER] = 20.0; 
-        hourlyRates[VehicleType::FOUR_WHEELER] = 50.0; 
-        hourlyRates[VehicleType::HEAVY] = 100.0;   
+        hourlyRates[VechileType::TWO_WHEELER] = 20.0;
+        hourlyRates[VechileType::FOUR_WHEELER] = 50.0;
+        hourlyRates[VechileType::HEAVY] = 100.0;
     }
     
 
 
-    double (shared_ptr<Ticket> ticket,long exit){
+    double calculateFare(const shared_ptr<Ticket>& ticket, long exitHour) override {
           
         if (ticket->getAllocatedSpot()->isReservedFor(ticket->getVehicle()->getOwnerUserId())) {
             return 0.0;
         }
 
         // Calculate hours parked (minimum 1 hour charged)
-        long long hoursParked = max(1LL, exitTime - ticket->getEntryTime());
+        long long hoursParked = max(1L, exitHour - ticket->getEntryTime());
         
         // Fetch rate based on vehicle type
-        double rate = hourlyRates[ticket->getVehicle()->getType()];
+        double rate = hourlyRates.at(ticket->getVehicle()->getType());
         
-        return hoursParked * rate
+        return hoursParked * rate;
 
     }
-}
+};

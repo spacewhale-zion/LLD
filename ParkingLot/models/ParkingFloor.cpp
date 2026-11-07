@@ -1,3 +1,5 @@
+#pragma once
+
 #include <bits/stdc++.h>
 #include<C:\ARYAN\STUDY\C++\LLD\ParkingLot\models\ParkingSpot.cpp>
 using namespace std;
@@ -26,7 +28,7 @@ public:
         }
         return allSpots;
     }
-    ~ParkingFloor();
+    ~ParkingFloor() = default;
 
 };
 

@@ -17,13 +17,13 @@ class ParkingLotService{
     private:
     vector<shared_ptr<ParkingFloor>> floors;
 
-    unordered_map<string,Ticket> activeTickets;
+    unordered_map<string,shared_ptr<Ticket>> activeTickets;
 
-    ISpotAllocationStrategy allocationStrategy;
-    IPricingStrategy pricingStrategy;
+    shared_ptr<ISpotAllocationStrategy> allocationStrategy;
+    shared_ptr<IPricingStrategy> pricingStrategy;
 
-    mutex ticketMutex;     // Lock for thread-safe access to activeTickets map
-    mutex consoleMutex;    // Lock to keep multi-threaded console logs readable
+    ParkingMutex ticketMutex;     // Lock for thread-safe access to activeTickets map
+    ParkingMutex consoleMutex;    // Lock to keep multi-threaded console logs readable
     atomic<int> ticketCounter{100}; // Thread-safe atomic counter for unique ticket IDs
 
     public:
@@ -36,18 +36,17 @@ class ParkingLotService{
         floors.push_back(floor);
     }
 
-    void setPricingStrategy(IPricingStrategy &ps){
-        this->pricingStrategy=ps;
+    void setPricingStrategy(shared_ptr<IPricingStrategy> ps){
+        pricingStrategy = move(ps);
     }
 
     shared_ptr<Ticket>issueTicket(const string&gateId, const shared_ptr<Vechile>&v,long entryHour){
         auto spot= allocationStrategy->allocateSpot(floors,v);
 
         if (!spot){
-            lock_guard<mutex>loglock(consoleMutex);
-            lock_guard<mutex> logLock(consoleMutex);
+            std::lock_guard<ParkingMutex> logLock(consoleMutex);
             cout << "[Gate " << gateId << " - DENIED] No available spot for Vehicle "
-                 << vehicle->getLicensePlate() << " (User: " << vehicle->getOwnerUserId() << ")\n";
+                  << v->getLicensePlate() << " (User: " << v->getOwnerUserId() << ")\n";
             return nullptr;
         }
         string ticketId="TKT-"+to_string(++ticketCounter);
@@ -55,14 +54,14 @@ class ParkingLotService{
         auto ticket= make_shared<Ticket>(ticketId,gateId,v,spot,entryHour);
 
         {
-            lock_guard<mutex>lock(ticketMutex);
+            std::lock_guard<ParkingMutex> lock(ticketMutex);
             activeTickets[ticketId]=ticket;
         }
 
         // 4. Log successful entry
         {
-            lock_guard<mutex> logLock(consoleMutex);
-            cout << "[Gate " << gateId << " - ENTRY] Vehicle " << vehicle->getLicensePlate()
+            std::lock_guard<ParkingMutex> logLock(consoleMutex);
+            cout << "[Gate " << gateId << " - ENTRY] Vehicle " << v->getLicensePlate()
                  << " allocated Spot " << spot->getSpotId()
                  << (spot->isVipSpot() ? " [VIP RESERVED]" : " [PUBLIC]")
                  << " on Floor " << spot->getFloorNumber()
@@ -78,8 +77,8 @@ class ParkingLotService{
         shared_ptr<Ticket>ticket;
         
         {
-            lock_guard<mutex>lock(ticketMutex);
-            auto it=activeTickets[ticketId];
+            std::lock_guard<ParkingMutex> lock(ticketMutex);
+            auto it = activeTickets.find(ticketId);
 
             if (it == activeTickets.end()) {
                 throw invalid_argument("Invalid or already closed Ticket ID: " + ticketId);
@@ -89,9 +88,9 @@ class ParkingLotService{
             activeTickets.erase(it);
         }
 
-        double fee= pricingStrategy->calculateFee(ticket,exitHour);
+        double fee = pricingStrategy->calculateFare(ticket, exitHour);
         {
-            lock_guard<mutex> logLock(consoleMutex);
+            std::lock_guard<ParkingMutex> logLock(consoleMutex);
             cout << "[Gate " << exitGateId << " - EXIT] Processing Ticket " << ticketId
                  << " for Vehicle " << ticket->getVehicle()->getLicensePlate() << "\n";
 

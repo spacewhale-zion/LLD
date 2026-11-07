@@ -1,3 +1,5 @@
+#pragma once
+
 #include <bits/stdc++.h>
 #include<C:\ARYAN\STUDY\C++\LLD\ParkingLot\models\ParkingSpot.cpp>
 #include<C:\ARYAN\STUDY\C++\LLD\ParkingLot\models\Vechile.cpp>
@@ -32,6 +34,10 @@ class Ticket{
     }
 
     shared_ptr<Vechile> getVechile() const {
+        return vechile;
+    }
+
+    shared_ptr<Vechile> getVehicle() const {
         return vechile;
     }
 

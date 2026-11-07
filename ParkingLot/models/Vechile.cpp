@@ -1,3 +1,5 @@
+#pragma once
+
 #include <bits/stdc++.h>
 #include<C:\ARYAN\STUDY\C++\LLD\ParkingLot\Enums\enums.cpp>
 using namespace std;
@@ -6,14 +8,11 @@ class Vechile
 {
 private:
    string licensePlate;
-   string type;
+   VechileType type;
    string ownerUserId;
 public:
-    Vechile(string lp,string tp,string oui="GUEST"){
-        this->licensePlate=lp;
-        this->type=tp;
-        this->ownerUserId=oui;
-    };
+    Vechile(string lp, VechileType tp, string oui="GUEST")
+        : licensePlate(move(lp)), type(tp), ownerUserId(move(oui)) {}
 
     string getLicensePlate() const {
         return licensePlate;
@@ -27,7 +26,7 @@ public:
         return ownerUserId;
     }
 
-    ~Vechile();
+    ~Vechile() = default;
 
 };
 

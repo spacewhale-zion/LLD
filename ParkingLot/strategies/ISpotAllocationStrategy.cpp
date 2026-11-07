@@ -1,3 +1,5 @@
+#pragma once
+
 #include <bits/stdc++.h>
 #include<C:\ARYAN\STUDY\C++\LLD\ParkingLot\models\ParkingSpot.cpp>
 #include<C:\ARYAN\STUDY\C++\LLD\ParkingLot\models\Vechile.cpp>
@@ -22,7 +24,9 @@ class VipAwareAllocationStrategy : public ISpotAllocationStrategy{
 
     public:
 
-    shared_ptr<ParkingSpot> allocateSpot(const vector<shared_ptr<ParkingFloor>>& floors,shared_ptr<Vechile>& vechile) override{
+    shared_ptr<ParkingSpot> allocateSpot(
+        const vector<shared_ptr<ParkingFloor>>& floors,
+        const shared_ptr<Vechile>& vechile) override{
 
         for (auto &floor:floors){
 

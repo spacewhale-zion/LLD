@@ -1,3 +1,5 @@
+#pragma once
+
 #include <bits/stdc++.h>
 #include<C:\ARYAN\STUDY\C++\LLD\ParkingLot\models\Vechile.cpp>
 #include<C:\ARYAN\STUDY\C++\LLD\ParkingLot\Enums\enums.cpp>
@@ -7,15 +9,15 @@ using namespace std;
 class ParkingSpot{
     private:
     string spotId;
-    string floorNo;
+    int floorNumber;
     VechileType supportedType;
     SpotStatus status;
     shared_ptr<Vechile>  parkedVechile;
     string reservedForUserId;
-    mutable mutex spotMutex;
+    mutable ParkingMutex spotMutex;
     public:
     ParkingSpot(string id, int floor, VechileType type, string vipUserId = "")
-        : spotId(move(id)), floorNo(floor), supportedType(type),
+        : spotId(move(id)), floorNumber(floor), supportedType(type),
           status(SpotStatus::AVAILABLE), reservedForUserId(move(vipUserId)),
           parkedVechile(nullptr) {}
 
@@ -38,12 +40,12 @@ class ParkingSpot{
         return !reservedForUserId.empty() && reservedForUserId == userId;
     }
     SpotStatus getStatus()const{
-        lock_guard<mutex> lock(spotMutex);
+        std::lock_guard<ParkingMutex> lock(spotMutex);
         return status;
     }
 
     bool tryPark(const shared_ptr<Vechile>vechile){
-        lock_guard<mutex> lock(spotMutex);
+        std::lock_guard<ParkingMutex> lock(spotMutex);
 
         if (status != SpotStatus::AVAILABLE ||  supportedType != vechile->getType()) return false;
 
@@ -55,7 +57,7 @@ class ParkingSpot{
     }
 
     void vacate(){
-        lock_guard<mutex> lock(spotMutex);
+        std::lock_guard<ParkingMutex> lock(spotMutex);
         parkedVechile=nullptr;
         status=SpotStatus::AVAILABLE;
     }
