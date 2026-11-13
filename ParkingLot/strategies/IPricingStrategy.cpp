@@ -35,10 +35,7 @@ class HourlyPricingStrategy:public IPricingStrategy{
             return 0.0;
         }
 
-        // Calculate hours parked (minimum 1 hour charged)
         long long hoursParked = max(1L, exitHour - ticket->getEntryTime());
-        
-        // Fetch rate based on vehicle type
         double rate = hourlyRates.at(ticket->getVehicle()->getType());
         
         return hoursParked * rate;

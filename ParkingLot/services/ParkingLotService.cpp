@@ -24,9 +24,9 @@ class ParkingLotService{
     shared_ptr<ISpotAllocationStrategy> allocationStrategy;
     shared_ptr<IPricingStrategy> pricingStrategy;
 
-    ParkingMutex ticketMutex;     // Lock for thread-safe access to activeTickets map
-    ParkingMutex consoleMutex;    // Lock to keep multi-threaded console logs readable
-    atomic<int> ticketCounter{100}; // Thread-safe atomic counter for unique ticket IDs
+    ParkingMutex ticketMutex;
+    ParkingMutex consoleMutex;
+    atomic<int> ticketCounter{100};
 
     public:
 
@@ -63,7 +63,6 @@ class ParkingLotService{
             activeTickets[ticketId]=ticket;
         }
 
-        // 4. Log successful entry
         {
             std::lock_guard<ParkingMutex> logLock(consoleMutex);
             cout << "[Gate " << gateId << " - ENTRY] Vehicle " << vehicle->getLicensePlate()
