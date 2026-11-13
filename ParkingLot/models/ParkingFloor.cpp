@@ -1,20 +1,20 @@
 #pragma once
 
 #include <bits/stdc++.h>
-#include<C:\ARYAN\STUDY\C++\LLD\ParkingLot\models\ParkingSpot.cpp>
+#include "ParkingSpot.cpp"
 using namespace std;
 
 class ParkingFloor
 {
 private:
     
-  string floorNo;
+    int floorNo;
 public:
-    ParkingFloor(string fn):floorNo(fn){};
+    explicit ParkingFloor(int fn):floorNo(fn) {}
 
     unordered_map<string,shared_ptr<ParkingSpot>>parkingSpotMap;
 
-    void addSpot(shared_ptr<ParkingSpot>&spot){
+    void addSpot(const shared_ptr<ParkingSpot>& spot){
         if(spot){
             parkingSpotMap[spot->getSpotId()]=spot;
         }

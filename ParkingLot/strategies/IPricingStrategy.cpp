@@ -2,8 +2,8 @@
 
 #include <bits/stdc++.h>
 
-#include<C:\ARYAN\STUDY\C++\LLD\ParkingLot\Enums\enums.cpp>
-#include<C:\ARYAN\STUDY\C++\LLD\ParkingLot\models\Ticket.cpp>
+#include "../Enums/enums.cpp"
+#include "../models/Ticket.cpp"
 
 using namespace std;
 

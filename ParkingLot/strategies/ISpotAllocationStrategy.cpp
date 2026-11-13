@@ -1,10 +1,10 @@
 #pragma once
 
 #include <bits/stdc++.h>
-#include<C:\ARYAN\STUDY\C++\LLD\ParkingLot\models\ParkingSpot.cpp>
-#include<C:\ARYAN\STUDY\C++\LLD\ParkingLot\models\Vechile.cpp>
-#include<C:\ARYAN\STUDY\C++\LLD\ParkingLot\Enums\enums.cpp>
-#include<C:\ARYAN\STUDY\C++\LLD\ParkingLot\models\ParkingFloor.cpp>
+#include "../models/ParkingSpot.cpp"
+#include "../models/Vechile.cpp"
+#include "../Enums/enums.cpp"
+#include "../models/ParkingFloor.cpp"
 
 
 using namespace std;
@@ -15,7 +15,7 @@ class ISpotAllocationStrategy{
 
     virtual shared_ptr<ParkingSpot> allocateSpot(
         const vector<shared_ptr<ParkingFloor>>& floors,
-        const shared_ptr<Vechile>& vechile) = 0;
+        const shared_ptr<Vehicle>& vehicle) = 0;
 
     virtual ~ISpotAllocationStrategy() = default;
 };
@@ -26,14 +26,14 @@ class VipAwareAllocationStrategy : public ISpotAllocationStrategy{
 
     shared_ptr<ParkingSpot> allocateSpot(
         const vector<shared_ptr<ParkingFloor>>& floors,
-        const shared_ptr<Vechile>& vechile) override{
+        const shared_ptr<Vehicle>& vehicle) override{
 
         for (auto &floor:floors){
 
             for (auto &spot:floor->getSpots()){
 
-                if (spot->isVipSpot() && spot->isReservedFor(vechile->getOwnerUserId()) && spot->getSupportedType() == vechile->getType()){
-                    if(spot->tryPark(vechile)){
+                if (spot->isVipSpot() && spot->isReservedFor(vehicle->getOwnerUserId()) && spot->getSupportedType() == vehicle->getType()){
+                    if(spot->tryPark(vehicle)){
                         return spot;
                     }
                 }
@@ -45,9 +45,9 @@ class VipAwareAllocationStrategy : public ISpotAllocationStrategy{
 
             for (auto &spot:floor->getSpots()){
 
-                if (!spot->isVipSpot() && spot->getSupportedType() == vechile->getType() ){
+                if (!spot->isVipSpot() && spot->getSupportedType() == vehicle->getType()){
 
-                    if(spot->tryPark(vechile)){
+                    if(spot->tryPark(vehicle)){
                         return spot;
                     }
                 }

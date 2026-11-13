@@ -1,9 +1,9 @@
 #pragma once
 
 #include <bits/stdc++.h>
-#include<C:\ARYAN\STUDY\C++\LLD\ParkingLot\models\ParkingSpot.cpp>
-#include<C:\ARYAN\STUDY\C++\LLD\ParkingLot\models\Vechile.cpp>
-#include<C:\ARYAN\STUDY\C++\LLD\ParkingLot\Enums\enums.cpp>
+#include "ParkingSpot.cpp"
+#include "Vechile.cpp"
+#include "../Enums/enums.cpp"
 
 using namespace std;
 
@@ -14,31 +14,31 @@ class Ticket{
     string entryGateId;
     long entryTime;
     long exitTime;
-    shared_ptr<Vechile>vechile;
+    shared_ptr<Vehicle> vehicle;
     shared_ptr<ParkingSpot>allocatedSpot;
     TicketStatus status;
 
     public:
 
-    Ticket(string id,string gateId,shared_ptr<Vechile>v,shared_ptr<ParkingSpot>ap,long time)
-    : ticketId(move(id)),entryGateId(move(gateId)),vechile(move(v)),allocatedSpot(ap),entryTime(time),exitTime(0),status(TicketStatus::ACTIVE){}
+    Ticket(string id,string gateId,shared_ptr<Vehicle> v,shared_ptr<ParkingSpot> ap,long time)
+    : ticketId(move(id)),entryGateId(move(gateId)),entryTime(time),exitTime(0),vehicle(move(v)),allocatedSpot(move(ap)),status(TicketStatus::ACTIVE){}
 
 
 
-    string getTicketId(){
+    string getTicketId() const {
         return ticketId;
     }
 
-    string getEntryGateId(){
+    string getEntryGateId() const {
         return entryGateId;
     }
 
-    shared_ptr<Vechile> getVechile() const {
-        return vechile;
+    shared_ptr<Vehicle> getVechile() const {
+        return vehicle;
     }
 
-    shared_ptr<Vechile> getVehicle() const {
-        return vechile;
+    shared_ptr<Vehicle> getVehicle() const {
+        return vehicle;
     }
 
     shared_ptr<ParkingSpot> getAllocatedSpot() const {

@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <atomic>
@@ -18,18 +17,21 @@ public:
     }
 };
 
-enum class VechileType{
+enum class VehicleType {
     TWO_WHEELER,
     FOUR_WHEELER,
     HEAVY
 };
 
-enum class SpotStatus{
+using VechileType = VehicleType;
+
+enum class SpotStatus {
     AVAILABLE,
     OCCUPIED,
-    UNDER_MAINTAINENCE
+    UNDER_MAINTENANCE
 };
-enum class TicketStatus{
-   ACTIVE,
-   PAID
+
+enum class TicketStatus {
+    ACTIVE,
+    PAID
 };

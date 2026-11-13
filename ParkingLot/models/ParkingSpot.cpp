@@ -1,8 +1,8 @@
 #pragma once
 
 #include <bits/stdc++.h>
-#include<C:\ARYAN\STUDY\C++\LLD\ParkingLot\models\Vechile.cpp>
-#include<C:\ARYAN\STUDY\C++\LLD\ParkingLot\Enums\enums.cpp>
+#include "Vechile.cpp"
+#include "../Enums/enums.cpp"
 
 using namespace std;
 
@@ -10,16 +10,16 @@ class ParkingSpot{
     private:
     string spotId;
     int floorNumber;
-    VechileType supportedType;
+    VehicleType supportedType;
     SpotStatus status;
-    shared_ptr<Vechile>  parkedVechile;
+    shared_ptr<Vehicle> parkedVehicle;
     string reservedForUserId;
     mutable ParkingMutex spotMutex;
     public:
-    ParkingSpot(string id, int floor, VechileType type, string vipUserId = "")
+    ParkingSpot(string id, int floor, VehicleType type, string vipUserId = "")
         : spotId(move(id)), floorNumber(floor), supportedType(type),
-          status(SpotStatus::AVAILABLE), reservedForUserId(move(vipUserId)),
-          parkedVechile(nullptr) {}
+                    status(SpotStatus::AVAILABLE), parkedVehicle(nullptr),
+                    reservedForUserId(move(vipUserId)) {}
 
     string getSpotId() const {
         return spotId;
@@ -29,7 +29,7 @@ class ParkingSpot{
         return floorNumber;
     }
 
-    VechileType getSupportedType() const {
+    VehicleType getSupportedType() const {
         return supportedType;
     }
 
@@ -44,21 +44,21 @@ class ParkingSpot{
         return status;
     }
 
-    bool tryPark(const shared_ptr<Vechile>vechile){
+    bool tryPark(const shared_ptr<Vehicle>& vehicle){
         std::lock_guard<ParkingMutex> lock(spotMutex);
 
-        if (status != SpotStatus::AVAILABLE ||  supportedType != vechile->getType()) return false;
+        if (!vehicle || status != SpotStatus::AVAILABLE || supportedType != vehicle->getType()) return false;
 
-        if (isVipSpot() && reservedForUserId != vechile->getOwnerUserId() )return false;
+        if (isVipSpot() && reservedForUserId != vehicle->getOwnerUserId()) return false;
 
         status=SpotStatus::OCCUPIED;
-        parkedVechile=vechile;
+        parkedVehicle=vehicle;
         return true;
     }
 
     void vacate(){
         std::lock_guard<ParkingMutex> lock(spotMutex);
-        parkedVechile=nullptr;
+        parkedVehicle=nullptr;
         status=SpotStatus::AVAILABLE;
     }
 };

@@ -18,7 +18,7 @@ public:
     UpiPaymentStrategy(string id) : upiId(move(id)) {}
 
     bool processPayment(double amount) override {
-        cout << "  [Payment] Successfully processed ₹" << amount << " via UPI (" << upiId << ")\n";
+        cout << "  [Payment] Successfully processed " << amount << " via UPI (" << upiId << ")\n";
         return true;
     }
 };
@@ -34,7 +34,7 @@ public:
 
     bool processPayment(double amount) override {
         string lastFour = cardNumber.length() >= 4 ? cardNumber.substr(cardNumber.length() - 4) : cardNumber;
-        cout << "  [Payment] Successfully processed ₹" << amount << " via Card ending in " << lastFour << " (Cardholder: " << cardHolderName << ")\n";
+        cout << "  [Payment] Successfully processed " << amount << " via Card ending in " << lastFour << " (Cardholder: " << cardHolderName << ")\n";
         return true;
     }
 };
@@ -42,7 +42,7 @@ public:
 class CashPaymentStrategy : public IPaymentStrategy {
 public:
     bool processPayment(double amount) override {
-        cout << "  [Payment] Successfully received ₹" << amount << " in Cash at the Exit Booth\n";
+        cout << "  [Payment] Successfully received " << amount << " in Cash at the Exit Booth\n";
         return true;
     }
 };

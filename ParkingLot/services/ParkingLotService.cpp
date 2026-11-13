@@ -1,12 +1,14 @@
-#include <bits/stdc++.h>
-#include<C:\ARYAN\STUDY\C++\LLD\ParkingLot\models\ParkingSpot.cpp>
-#include<C:\ARYAN\STUDY\C++\LLD\ParkingLot\models\Vechile.cpp>
-#include<C:\ARYAN\STUDY\C++\LLD\ParkingLot\Enums\enums.cpp>
-#include<C:\ARYAN\STUDY\C++\LLD\ParkingLot\models\ParkingFloor.cpp>
+#pragma once
 
-#include<C:\ARYAN\STUDY\C++\LLD\ParkingLot\strategies\ISpotAllocationStrategy.cpp>
-#include<C:\ARYAN\STUDY\C++\LLD\ParkingLot\strategies\IPricingStrategy.cpp>
-#include<C:\ARYAN\STUDY\C++\LLD\ParkingLot\strategies\IPaymentStrategy.cpp>
+#include <bits/stdc++.h>
+#include "../models/ParkingSpot.cpp"
+#include "../models/Vechile.cpp"
+#include "../Enums/enums.cpp"
+#include "../models/ParkingFloor.cpp"
+#include "../models/Ticket.cpp"
+#include "../strategies/ISpotAllocationStrategy.cpp"
+#include "../strategies/IPricingStrategy.cpp"
+#include "../strategies/IPaymentStrategy.cpp"
 
 
 using namespace std;
@@ -32,7 +34,7 @@ class ParkingLotService{
                       shared_ptr<IPricingStrategy> pricing)
         : allocationStrategy(move(alloc)), pricingStrategy(move(pricing)) {}
 
-    void addFloor(shared_ptr<ParkingFloor>&floor){
+    void addFloor(const shared_ptr<ParkingFloor>& floor){
         floors.push_back(floor);
     }
 
@@ -40,18 +42,21 @@ class ParkingLotService{
         pricingStrategy = move(ps);
     }
 
-    shared_ptr<Ticket>issueTicket(const string&gateId, const shared_ptr<Vechile>&v,long entryHour){
-        auto spot= allocationStrategy->allocateSpot(floors,v);
+    shared_ptr<Ticket> issueTicket(const string& gateId, const shared_ptr<Vehicle>& vehicle, long entryHour){
+        if (!vehicle) {
+            throw invalid_argument("Vehicle cannot be null");
+        }
+        auto spot = allocationStrategy->allocateSpot(floors, vehicle);
 
         if (!spot){
             std::lock_guard<ParkingMutex> logLock(consoleMutex);
             cout << "[Gate " << gateId << " - DENIED] No available spot for Vehicle "
-                  << v->getLicensePlate() << " (User: " << v->getOwnerUserId() << ")\n";
+                  << vehicle->getLicensePlate() << " (User: " << vehicle->getOwnerUserId() << ")\n";
             return nullptr;
         }
         string ticketId="TKT-"+to_string(++ticketCounter);
 
-        auto ticket= make_shared<Ticket>(ticketId,gateId,v,spot,entryHour);
+        auto ticket = make_shared<Ticket>(ticketId, gateId, vehicle, spot, entryHour);
 
         {
             std::lock_guard<ParkingMutex> lock(ticketMutex);
@@ -61,7 +66,7 @@ class ParkingLotService{
         // 4. Log successful entry
         {
             std::lock_guard<ParkingMutex> logLock(consoleMutex);
-            cout << "[Gate " << gateId << " - ENTRY] Vehicle " << v->getLicensePlate()
+            cout << "[Gate " << gateId << " - ENTRY] Vehicle " << vehicle->getLicensePlate()
                  << " allocated Spot " << spot->getSpotId()
                  << (spot->isVipSpot() ? " [VIP RESERVED]" : " [PUBLIC]")
                  << " on Floor " << spot->getFloorNumber()
@@ -73,19 +78,19 @@ class ParkingLotService{
 
     }
 
-    double processExit(const string &exitGateId,const string &ticketId,IPaymentStrategy & paymentMethod ,long exitHour ){
+    double processExit(const string& exitGateId, const string& ticketId, IPaymentStrategy& paymentMethod, long exitHour) {
         shared_ptr<Ticket>ticket;
-        
-        {
-            std::lock_guard<ParkingMutex> lock(ticketMutex);
-            auto it = activeTickets.find(ticketId);
 
-            if (it == activeTickets.end()) {
-                throw invalid_argument("Invalid or already closed Ticket ID: " + ticketId);
-            }
+        std::lock_guard<ParkingMutex> ticketLock(ticketMutex);
+        auto it = activeTickets.find(ticketId);
+        if (it == activeTickets.end()) {
+            throw invalid_argument("Invalid or already closed Ticket ID: " + ticketId);
+        }
 
-            ticket=it->second;
-            activeTickets.erase(it);
+        ticket = it->second;
+
+        if (exitHour < ticket->getEntryTime()) {
+            throw invalid_argument("Exit time cannot be before entry time");
         }
 
         double fee = pricingStrategy->calculateFare(ticket, exitHour);
@@ -99,15 +104,16 @@ class ParkingLotService{
                     throw runtime_error("Payment failed!");
                 }
             } else {
-                cout << "  [Payment] ₹0 (VIP Permanently Booked Spot - Prepaid)\n";
+                cout << "  [Payment] 0 (VIP permanently booked spot - prepaid)\n";
             }
 
             ticket->markPaid(exitHour);
             ticket->getAllocatedSpot()->vacate();
-            
+
             cout << "  [Spot Freed] Spot " << ticket->getAllocatedSpot()->getSpotId() << " is now AVAILABLE.\n";
         }
-        
+
+        activeTickets.erase(it);
         return fee;
 
 
